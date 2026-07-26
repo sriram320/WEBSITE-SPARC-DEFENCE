@@ -83,7 +83,8 @@ export const HERO_PRODUCTS: HeroProduct[] = [
     label: "Guided Munition",
     railName: "GUIDED MUNITION",
     ariaLabel:
-      "Guided munition airframe, shown disassembling into its component modules as the page scrolls.",
+      "Guided munition airframe, shown first as a photograph in flight and then disassembling into its component modules as the page scrolls.",
+    openingStill: "photo-munition",
     beats: [
       {
         from: 0,
