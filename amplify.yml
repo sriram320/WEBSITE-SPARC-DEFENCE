@@ -3,6 +3,13 @@ frontend:
   phases:
     preBuild:
       commands:
+        # Next 16 and sharp both declare engines >=20.9.0. Amplify's default
+        # build image can still be on Node 18, where `next build` aborts
+        # immediately. Select an explicit version rather than inherit one.
+        - nvm install 20
+        - nvm use 20
+        # Echoed so the build log states the version outright if this recurs.
+        - node -v && npm -v
         # `npm ci` needs the lockfile; it is committed.
         - npm ci
     build:
