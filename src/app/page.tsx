@@ -18,8 +18,11 @@ export default function Home() {
 
   return (
     <>
-      {/* Act I — the exploded hero */}
-      <ExplodedHero pinVh={340} />
+      {/* Act I — the exploded hero.
+          680vh of pin against ~540 frames means roughly one frame per 1.3vh of
+          scroll — slow enough to read each labelled part on the way past, which
+          is the point of carrying the full sequence. */}
+      <ExplodedHero pinVh={680} />
 
       {/* Act II/III — reassembly hands off to the field record */}
       <FieldProof
