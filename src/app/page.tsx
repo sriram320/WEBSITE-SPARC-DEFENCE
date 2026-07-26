@@ -19,10 +19,11 @@ export default function Home() {
   return (
     <>
       {/* Act I — the exploded hero.
-          680vh of pin against ~540 frames means roughly one frame per 1.3vh of
-          scroll — slow enough to read each labelled part on the way past, which
-          is the point of carrying the full sequence. */}
-      <ExplodedHero pinVh={680} />
+          1100vh of pin against 240–299 frames gives ~35px of scroll per frame,
+          slow enough to read each labelled part on the way past — which is the
+          point of carrying the full sequence. This one number sets the whole
+          pace of the hero; raise it to slow the scrub, lower it to quicken. */}
+      <ExplodedHero pinVh={1100} />
 
       {/* Act II/III — reassembly hands off to the field record */}
       <FieldProof

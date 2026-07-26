@@ -52,7 +52,7 @@ export default async function ProductPage({
       {/* 1 — hero */}
       {useScrubber && heroProduct ? (
         <ExplodedHero
-          pinVh={400}
+          pinVh={650}
           products={[heroProduct]}
           showSwitcher={false}
           compact
