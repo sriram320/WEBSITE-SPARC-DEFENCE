@@ -133,6 +133,24 @@ scripts/
 
 ---
 
+## License
+
+The **source code** in this repository is released under the MIT License — see
+[`LICENSE`](./LICENSE).
+
+MIT deliberately covers the code only. It does **not** grant any right to the
+brand or to the media in this repository:
+
+- the Sparc Aerotech name, wordmark and visual identity;
+- everything under `public/frames/`, `public/video/`, `public/posters/` and
+  `public/img/` — product imagery, frame sequences and footage;
+- the marketing copy in `src/data/` and in the page components.
+
+All of the above are © Sparc Aerotech Pvt Ltd, all rights reserved. Reuse the
+code freely; replace the assets and copy with your own.
+
+---
+
 ## Quality floor
 
 Verified on the production build:
