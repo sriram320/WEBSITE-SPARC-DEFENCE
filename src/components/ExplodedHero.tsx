@@ -8,7 +8,7 @@ import ExplodedScrubber from "./ExplodedScrubber";
 import { useFrameSequence } from "@/lib/useFrameSequence";
 import { useRailReadout } from "./Telemetry";
 import { HERO_PRODUCTS, type HeroBeat, type HeroProduct } from "@/data/heroOverlays";
-import { hasFrames } from "@/data/assets";
+import { hasFrames, openingPlate } from "@/data/assets";
 import { useMediaQuery, usePrefersReducedMotion } from "@/lib/useMediaQuery";
 
 type Props = {
@@ -54,6 +54,9 @@ export default function ExplodedHero({
 
   const active = list.find((p) => p.key === activeKey) ?? list[0];
   const inactive = list.find((p) => p.key !== activeKey);
+  // Resolved through the manifest, so a missing photo just means the hero opens
+  // on frame 1 rather than breaking.
+  const openingStill = active?.openingStill ? openingPlate(active.key) : null;
 
   // Scout loads immediately; the other sequence backfills once it is done, so
   // the visible product is never starved of bandwidth (§6.2).
@@ -145,6 +148,10 @@ export default function ExplodedHero({
               className="absolute inset-0 h-full w-full"
               fitScale={narrow ? 1.7 : compact ? 0.9 : 0.84}
               offsetY={narrow ? -0.06 : compact ? 0 : -0.05}
+              openingStill={openingStill ?? undefined}
+              // Long enough to register as a held photograph before it gives
+              // way, short enough that it is gone by the first narrative beat.
+              stillFade={0.045}
             />
           )}
 

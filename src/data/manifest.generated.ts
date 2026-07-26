@@ -571,6 +571,8 @@ export const POSTERS: readonly string[] = [
 ];
 
 export const IMAGES: readonly string[] = [
+  "opening-munition.webp",
+  "opening-scout.webp",
   "photo-munition.jpg",
   "photo-scout.jpg"
 ];

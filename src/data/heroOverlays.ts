@@ -28,6 +28,13 @@ export type HeroProduct = {
   /** spoken name used in the telemetry rail */
   railName: string;
   ariaLabel: string;
+  /**
+   * Optional photograph of the real aircraft, held at rest and dissolved away
+   * as the scrub begins. The hero opens on the machine as it actually exists
+   * before it comes apart, which reads as evidence rather than illustration.
+   * Resolved through the asset manifest, so removing the file just skips it.
+   */
+  openingStill?: string;
   beats: HeroBeat[];
 };
 
@@ -37,7 +44,8 @@ export const HERO_PRODUCTS: HeroProduct[] = [
     label: "Scout",
     railName: "SCOUT / ISR",
     ariaLabel:
-      "Scout ISR quadcopter, shown disassembling into its component modules as the page scrolls.",
+      "Scout ISR quadcopter, shown first as a photograph and then disassembling into its component modules as the page scrolls.",
+    openingStill: "photo-scout",
     beats: [
       {
         from: 0,

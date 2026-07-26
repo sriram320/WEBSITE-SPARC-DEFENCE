@@ -15,6 +15,15 @@ type Props = {
   fitScale?: number;
   /** nudge the plate off-centre, as a fraction of canvas height */
   offsetY?: number;
+  /**
+   * A real photograph held over frame 1 and dissolved away as the scrub starts.
+   * Drawn into the same canvas with the same fit, so the hand-off is a true
+   * cross-dissolve with no jump in scale or position — which an overlaid <img>
+   * could not guarantee.
+   */
+  openingStill?: string;
+  /** scroll fraction over which the still gives way to the sequence */
+  stillFade?: number;
 };
 
 /**
@@ -38,12 +47,38 @@ export default function ExplodedScrubber({
   className,
   fitScale = 1,
   offsetY = 0,
+  openingStill,
+  stillFade = 0.05,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const target = useRef(0);
   const drawn = useRef(-1);
   const rafId = useRef<number>(0);
   const dims = useRef({ w: 0, h: 0, dpr: 1 });
+  const still = useRef<HTMLImageElement | null>(null);
+
+  // Load the opening photograph once; a failure to load simply means the hero
+  // opens on frame 1 instead, which is the previous behaviour.
+  useEffect(() => {
+    still.current = null;
+    if (!openingStill) return;
+    const img = new Image();
+    img.decoding = "async";
+    img.src = openingStill;
+    let live = true;
+    img.decode().then(
+      () => {
+        if (live) {
+          still.current = img;
+          drawn.current = -1;
+        }
+      },
+      () => {},
+    );
+    return () => {
+      live = false;
+    };
+  }, [openingStill]);
 
   // Scroll progress is mirrored into a ref rather than read from state inside
   // the draw loop: the rAF loop reads it every frame and must not re-subscribe
@@ -89,26 +124,48 @@ export default function ExplodedScrubber({
     // frame pipeline, so letterboxing is invisible against the page — and
     // containing means the exploded parts are never cropped off at a narrow
     // viewport, which cover-fit would do badly on phones.
-    const scale = Math.min(w / img.naturalWidth, h / img.naturalHeight) * fitScale;
-    const dw = img.naturalWidth * scale;
-    const dh = img.naturalHeight * scale;
+    const place = (src: HTMLImageElement) => {
+      const scale = Math.min(w / src.naturalWidth, h / src.naturalHeight) * fitScale;
+      const dw = src.naturalWidth * scale;
+      const dh = src.naturalHeight * scale;
+      return [(w - dw) / 2, (h - dh) / 2 + offsetY * h, dw, dh] as const;
+    };
 
     ctx.fillStyle = "#060606";
     ctx.fillRect(0, 0, w, h);
-    ctx.drawImage(img, (w - dw) / 2, (h - dh) / 2 + offsetY * h, dw, dh);
+    ctx.globalAlpha = 1;
+    ctx.drawImage(img, ...place(img));
+
+    // The opening photograph sits on top and dissolves away as the scrub
+    // starts, so the hero opens on the real aircraft and the exploded sequence
+    // emerges from underneath it.
+    const s = still.current;
+    if (s && stillFade > 0) {
+      const a = 1 - Math.min(Math.max(target.current / stillFade, 0), 1);
+      if (a > 0.001) {
+        ctx.globalAlpha = a;
+        ctx.drawImage(s, ...place(s));
+        ctx.globalAlpha = 1;
+      }
+    }
+
     drawn.current = f;
-  }, [seq, resolveFrame, fitScale, offsetY]);
+  }, [seq, resolveFrame, fitScale, offsetY, stillFade]);
 
   // Single rAF loop; redraws only when the target has actually moved.
   useEffect(() => {
     const tick = () => {
       const f = target.current * Math.max(seq.count - 1, 1);
-      if (Math.abs(f - drawn.current) >= 0.5 || drawn.current < 0) paint();
+      // While the opening still is dissolving, repaint every frame: its alpha
+      // is continuous, so waiting for the frame index to tick over would make
+      // the fade visibly step.
+      const fading = still.current !== null && target.current < stillFade * 1.05;
+      if (fading || Math.abs(f - drawn.current) >= 0.5 || drawn.current < 0) paint();
       rafId.current = requestAnimationFrame(tick);
     };
     rafId.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId.current);
-  }, [paint, seq.count]);
+  }, [paint, seq.count, stillFade]);
 
   // Repaint when new frames land, so the picture sharpens as loading proceeds.
   useEffect(() => {

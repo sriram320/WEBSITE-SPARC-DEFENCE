@@ -15,6 +15,7 @@
     "prebuild": "node scripts/build-manifest.cjs",
     "frames": "node scripts/build-frames.cjs",
     "posters": "node scripts/build-posters.cjs",
+    "openers": "node scripts/build-openers.cjs",
     "manifest": "node scripts/build-manifest.cjs"
   },
   "dependencies": {

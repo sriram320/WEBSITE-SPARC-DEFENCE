@@ -75,3 +75,15 @@ export function productPhoto(slug: string): string | null {
   }
   return null;
 }
+
+/**
+ * The hero opening plate — the product photo conformed to the frame sequence's
+ * aspect, grade and edge feather by `npm run openers`, so it cross-dissolves
+ * into the scrub without a letterbox or colour jump. Falls back to the raw
+ * photo, and then to nothing, so a missing file only costs the effect.
+ */
+export function openingPlate(product: ProductKey): string | null {
+  const conformed = `opening-${product}.webp`;
+  if (IMAGES.includes(conformed)) return `/img/${conformed}`;
+  return productPhoto(product);
+}
