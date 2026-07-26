@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useScrolledPast } from "@/lib/useMediaQuery";
+import { useSignedInHint } from "@/lib/useSignedInHint";
 
 /**
  * Whisper-thin fixed nav — BUILD_BRIEF §6.1.
@@ -21,6 +22,10 @@ const LINKS = [
 export default function Nav() {
   const scrolled = useScrolledPast(40);
   const pathname = usePathname();
+  // Read from the UI-only hint cookie rather than a session lookup on the
+  // server: reading a token in the root layout would make every marketing page
+  // dynamic. This only decides a link label — it grants nothing.
+  const signedIn = useSignedInHint();
   // Remember which route the menu was opened on, so navigating closes it
   // without needing an effect to chase the pathname.
   const [openedOn, setOpenedOn] = useState<string | null>(null);
@@ -58,6 +63,12 @@ export default function Nav() {
           <Link href="/contact" className="t-label text-ink no-underline link-quiet">
             Request a briefing
           </Link>
+          <Link
+            href={signedIn ? "/account" : "/login"}
+            className="t-label text-ink-faint no-underline transition-colors duration-200 hover:text-ink"
+          >
+            {signedIn ? "Account" : "Log in"}
+          </Link>
         </div>
 
         <button
@@ -81,6 +92,9 @@ export default function Nav() {
             ))}
             <Link href="/contact" className="t-label text-ink no-underline link-quiet self-start">
               Request a briefing
+            </Link>
+            <Link href={signedIn ? "/account" : "/login"} className="t-label text-ink-faint no-underline">
+              {signedIn ? "Account" : "Log in"}
             </Link>
           </div>
         </div>
