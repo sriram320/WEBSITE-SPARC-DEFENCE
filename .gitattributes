@@ -1,0 +1,11 @@
+# Amplify builds on Linux; keep text normalised so a Windows checkout does not
+# produce diffs or break shell scripts.
+* text=auto eol=lf
+
+# Binary assets — never touch these.
+*.webp binary
+*.mp4  binary
+*.jpg  binary
+*.jpeg binary
+*.png  binary
+*.ico  binary

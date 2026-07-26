@@ -1,0 +1,197 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Design tokens — BUILD_BRIEF §4.1
+   --void is the exact black the frame sequences are composited onto, so the
+   canvas meets the page with no visible edge.
+   --------------------------------------------------------------------------- */
+@theme {
+  --color-void: #060606;
+  --color-panel: #0e1116;
+  --color-panel-hi: #151a21;
+  --color-rule: #1c2129;
+  --color-rule-lit: #2a323d;
+
+  --color-ink: #ede8e0;
+  --color-ink-dim: rgb(196 189 177 / 0.72);
+  /* BUILD_BRIEF §4.1 specifies #5A5852 here, but against --void that is 2.84:1
+     — below the 4.5:1 WCAG AA needs for the 11–12px mono labels this token is
+     used on, on every page. Lightened to the darkest warm grey that clears AA
+     (4.65:1). Still clearly recessive against --ink; the quiet register holds. */
+  --color-ink-faint: #7c7972;
+
+  /* semantic state — telemetry rail and live indicators only */
+  --color-link: #3d7dff;
+  --color-disrupt: #ffa23d;
+  --color-autonomous: #3dffa0;
+
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-grotesk), system-ui, sans-serif;
+  --font-mono: var(--font-mono-data), ui-monospace, monospace;
+
+  --ease-slow: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+:root {
+  --rail-h: 32px;
+  color-scheme: dark;
+}
+
+@layer base {
+  html {
+    background: var(--color-void);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--color-void);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--color-ink);
+    color: var(--color-void);
+  }
+
+  /* Visible keyboard focus everywhere — never a bare outline:none (§12) */
+  :focus-visible {
+    outline: 1px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+
+  img, video, canvas {
+    max-width: 100%;
+  }
+}
+
+@layer components {
+  /* Display scale — headlines set large and quiet, never bold-shouty */
+  .t-display-xl {
+    font-family: var(--font-display);
+    font-size: clamp(2.75rem, 7vw, 6rem);
+    font-weight: 400;
+    font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 0;
+    letter-spacing: -0.015em;
+    line-height: 1.02;
+  }
+  .t-display-l {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4.5vw, 3.5rem);
+    font-weight: 400;
+    font-variation-settings: "opsz" 96, "SOFT" 0, "WONK" 0;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+  .t-display-m {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 2.6vw, 2.125rem);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.18;
+  }
+
+  /* Mono label — generous tracking, the haute-horlogerie move (§4.2) */
+  .t-label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .t-data {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .t-body {
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    color: var(--color-ink);
+    opacity: 0.9;
+  }
+  .t-body-dim {
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    color: var(--color-ink-dim);
+  }
+
+  .shell {
+    width: 100%;
+    max-width: 88rem;
+    margin-inline: auto;
+    padding-inline: clamp(1.25rem, 4vw, 3.5rem);
+  }
+
+  /* Corner-bracket container — the HUD motif, used where a frame is needed */
+  .brackets {
+    position: relative;
+  }
+  .brackets::before,
+  .brackets::after {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-color: var(--color-rule-lit);
+    pointer-events: none;
+  }
+  .brackets::before {
+    top: 0; left: 0;
+    border-top: 1px solid; border-left: 1px solid;
+  }
+  .brackets::after {
+    bottom: 0; right: 0;
+    border-bottom: 1px solid; border-right: 1px solid;
+  }
+
+  /* The only link treatment: a hairline underline, no buttons with fills */
+  .link-quiet {
+    position: relative;
+    display: inline-block;
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+  .link-quiet::after {
+    content: "";
+    position: absolute;
+    left: 0; bottom: -3px;
+    width: 100%; height: 1px;
+    background: currentColor;
+    transform-origin: left;
+    transition: opacity 150ms var(--ease-slow);
+    opacity: 0.45;
+  }
+  .link-quiet:hover::after { opacity: 1; }
+}
+
+/* Full reduced-motion support (§4.3, §12) — the scrub becomes a static frame,
+   overlays become plain fades, nothing animates on a timer. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
