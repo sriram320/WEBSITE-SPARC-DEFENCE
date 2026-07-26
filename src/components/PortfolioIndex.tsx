@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { animate, stagger } from "animejs";
 import { PRODUCTS } from "@/data/products";
 import { productPhoto } from "@/data/assets";
 
@@ -15,6 +16,50 @@ import { productPhoto } from "@/data/assets";
  */
 export default function PortfolioIndex({ heading }: { heading?: string }) {
   const [hovered, setHovered] = useState<string | null>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+
+  // Rows stagger in once, on first scroll into view (REVISION_BRIEF §3.2).
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const rows = Array.from(el.querySelectorAll<HTMLElement>("li"));
+    if (!rows.length) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    for (const r of rows) {
+      r.style.opacity = "0";
+      r.style.willChange = "opacity, transform";
+    }
+
+    let anim: ReturnType<typeof animate> | null = null;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        io.disconnect();
+        anim = animate(rows, {
+          opacity: [0, 1],
+          translateY: [18, 0],
+          delay: stagger(70),
+          duration: 700,
+          ease: "outCubic",
+          onComplete: () => {
+            // clear inline styles so hover/dim transitions own these again
+            for (const r of rows) {
+              r.style.willChange = "";
+              r.style.opacity = "";
+              r.style.transform = "";
+            }
+          },
+        });
+      },
+      { threshold: 0.08 },
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      anim?.pause();
+    };
+  }, []);
 
   return (
     <section
@@ -30,7 +75,11 @@ export default function PortfolioIndex({ heading }: { heading?: string }) {
         </div>
       )}
 
-      <ul className="border-t border-rule" onMouseLeave={() => setHovered(null)}>
+      <ul
+        ref={listRef}
+        className="border-t border-rule"
+        onMouseLeave={() => setHovered(null)}
+      >
         {PRODUCTS.map((p) => {
           const isHovered = hovered === p.slug;
           const dimmed = hovered !== null && !isHovered;

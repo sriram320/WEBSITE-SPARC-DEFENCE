@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { animate } from "animejs";
 import { posterUrl, videoUrl } from "@/data/assets";
 
 type Props = {
@@ -29,6 +30,7 @@ export default function FieldProof({
   const src = videoUrl(name);
   const poster = posterUrl(name) ?? undefined;
   const ref = useRef<HTMLVideoElement>(null);
+  const captionRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
 
   useEffect(() => {
@@ -44,6 +46,47 @@ export default function FieldProof({
     );
     io.observe(el);
     return () => io.disconnect();
+  }, [src]);
+
+  // Band reveal (REVISION_BRIEF §3.2): the footage lifts out of the poster and
+  // the mono readout slides in from the left, once, on first approach.
+  useEffect(() => {
+    const video = ref.current;
+    const caption = captionRef.current;
+    if (!video || !caption) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    video.style.opacity = "0.6";
+    caption.style.opacity = "0";
+
+    let a: ReturnType<typeof animate> | null = null;
+    let b: ReturnType<typeof animate> | null = null;
+
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        io.disconnect();
+        a = animate(video, { opacity: [0.6, 1], duration: 900, ease: "outCubic" });
+        b = animate(caption, {
+          opacity: [0, 1],
+          translateX: [-24, 0],
+          duration: 800,
+          delay: 180,
+          ease: "outCubic",
+          onComplete: () => {
+            caption.style.opacity = "";
+            caption.style.transform = "";
+          },
+        });
+      },
+      { threshold: 0.2 },
+    );
+    io.observe(video);
+    return () => {
+      io.disconnect();
+      a?.pause();
+      b?.pause();
+    };
   }, [src]);
 
   if (!src) return null;
@@ -74,7 +117,10 @@ export default function FieldProof({
         />
 
         <div className="pointer-events-none absolute inset-x-0 bottom-0 p-6 sm:p-10">
-          <div className="shell flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div
+            ref={captionRef}
+            className="shell flex flex-col gap-4 md:flex-row md:items-end md:justify-between"
+          >
             <p className="t-label text-ink-faint">
               <span className="text-ink">▸</span> {label}
               {!inView && <span className="ml-3 text-ink-faint">PAUSED</span>}

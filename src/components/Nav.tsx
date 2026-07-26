@@ -14,6 +14,7 @@ const LINKS = [
   { href: "/gvl", label: "GVL" },
   { href: "/products", label: "Products" },
   { href: "/company", label: "Company" },
+  { href: "/careers", label: "Careers" },
   { href: "/shop", label: "Shop" },
 ];
 

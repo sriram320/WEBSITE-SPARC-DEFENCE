@@ -4,6 +4,7 @@ import ExplodedHero from "@/components/ExplodedHero";
 import FieldProof from "@/components/FieldProof";
 import PortfolioIndex from "@/components/PortfolioIndex";
 import StackDiagram from "@/components/StackDiagram";
+import Reveal from "@/components/Reveal";
 import { productPhoto } from "@/data/assets";
 
 /**
@@ -35,7 +36,11 @@ export default function Home() {
 
       {/* Act VI — craftsmanship / editorial band */}
       <section className="rule-t" aria-label="Engineering philosophy">
-        <div className="shell grid gap-12 py-24 sm:py-32 md:grid-cols-12">
+        <Reveal
+          as="div"
+          className="shell grid gap-12 py-24 sm:py-32 md:grid-cols-12"
+          distance={28}
+        >
           <div className="md:col-span-5">
             <p className="t-label mb-6 text-ink-faint">Engineering</p>
             <h2 className="t-display-l text-ink">Accountable, end to end.</h2>
@@ -56,7 +61,7 @@ export default function Home() {
               room.
             </p>
           </div>
-        </div>
+        </Reveal>
 
         {macro && (
           <div className="relative h-[52svh] min-h-[340px] w-full overflow-hidden">
@@ -81,7 +86,11 @@ export default function Home() {
 
       {/* Act VII — close */}
       <section className="rule-t" aria-label="Request a briefing">
-        <div className="shell flex flex-col items-start gap-8 py-32 sm:py-40">
+        <Reveal
+          as="div"
+          className="shell flex flex-col items-start gap-8 py-32 sm:py-40"
+          gap={90}
+        >
           <p className="t-label text-ink-faint">Next step</p>
           <h2 className="t-display-xl max-w-[16ch] text-ink">
             Request a briefing.
@@ -93,7 +102,7 @@ export default function Home() {
           <Link href="/contact" className="t-label link-quiet text-ink">
             Contact Sparc Aerotech →
           </Link>
-        </div>
+        </Reveal>
       </section>
     </>
   );

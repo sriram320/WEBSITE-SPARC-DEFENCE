@@ -29,21 +29,24 @@ export function frameSequence(product: ProductKey): FrameSequence | null {
 }
 
 /**
- * URL for one frame. `index` is 1-based to match the on-disk numbering
- * (scout_0001.webp … scout_0150.webp).
+ * URL for one frame. `index` is 1-based.
+ *
+ * Resolved from the manifest's real file list rather than rebuilt from a naming
+ * pattern, so a renamed, added or missing frame can never become an unreachable
+ * index or a 404.
  */
 export function frameUrl(product: ProductKey, index: number): string {
   const seq = FRAME_SEQUENCES[product];
-  if (!seq) return "";
+  if (!seq || !seq.count) return "";
   const clamped = Math.min(Math.max(index, 1), seq.count);
-  return `/frames/${product}/${product}_${String(clamped).padStart(seq.pad, "0")}.${seq.ext}`;
+  return `/frames/${product}/${seq.files[clamped - 1]}`;
 }
 
 /** All frame URLs for a product, in order. */
 export function frameUrls(product: ProductKey): string[] {
   const seq = FRAME_SEQUENCES[product];
   if (!seq) return [];
-  return Array.from({ length: seq.count }, (_, i) => frameUrl(product, i + 1));
+  return seq.files.map((f) => `/frames/${product}/${f}`);
 }
 
 /** Video by base name, e.g. "scout-tracking" -> "/video/scout-tracking.mp4". */

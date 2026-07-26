@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Fraunces, Inter_Tight, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Nav from "@/components/Nav";
@@ -64,17 +65,39 @@ export default function RootLayout({
   );
 }
 
+const FOOTER_LINKS = [
+  { href: "/gvl", label: "GVL" },
+  { href: "/products", label: "Products" },
+  { href: "/company", label: "Company" },
+  { href: "/careers", label: "Careers" },
+  { href: "/shop", label: "Shop" },
+  { href: "/contact", label: "Contact" },
+];
+
 function SiteFooter() {
   return (
     <footer className="rule-t">
-      <div className="shell flex flex-col gap-6 py-10 md:flex-row md:items-center md:justify-between">
-        <p className="t-label text-ink-faint">
-          Sparc Aerotech Pvt Ltd · Bengaluru, India
-        </p>
-        <p className="t-label max-w-md text-ink-faint">
-          Capability shown reflects design intent and development status, not
-          certified performance.
-        </p>
+      <div className="shell flex flex-col gap-8 py-10">
+        <nav className="flex flex-wrap gap-x-8 gap-y-3" aria-label="Footer">
+          {FOOTER_LINKS.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className="t-label text-ink-faint no-underline transition-colors duration-200 hover:text-ink"
+            >
+              {l.label}
+            </Link>
+          ))}
+        </nav>
+        <div className="flex flex-col gap-6 border-t border-rule pt-8 md:flex-row md:items-center md:justify-between">
+          <p className="t-label text-ink-faint">
+            Sparc Aerotech Pvt Ltd · Bengaluru, India
+          </p>
+          <p className="t-label max-w-md text-ink-faint">
+            Capability shown reflects design intent and development status, not
+            certified performance.
+          </p>
+        </div>
       </div>
     </footer>
   );

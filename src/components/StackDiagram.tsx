@@ -1,15 +1,20 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { createTimeline, stagger } from "animejs";
 
 /**
- * Act V — the stack (BUILD_BRIEF §6.6).
- * An SVG structural diagram: the GVL brain at centre, plugging into airframes
- * and LegionNet. Lines draw in on scroll via stroke-dasharray, hairline, slow
- * and eased. The brain node is the one place --autonomous appears on this page.
+ * Act V — the stack (BUILD_BRIEF §6.6, motion per REVISION_BRIEF §3.2).
+ *
+ * An SVG structural diagram: the GVL core at centre, feeding six platforms. The
+ * connector paths draw in sequence via an anime.js timeline, the node labels
+ * fade up behind them, then the core pulses once in --autonomous. That pulse is
+ * the only place a state colour animates anywhere on the page, which is what
+ * keeps it meaning something.
+ *
+ * Labels sit centred beneath their node rather than flying off to the side, so
+ * a long one like "Guided Munition" cannot run past the edge of the viewBox.
  */
-// Labels sit centred beneath their node rather than flying off to the side, so
-// a long one like "Guided Munition" cannot run past the edge of the viewBox.
 const NODES = [
   { x: 17, y: 16, label: "Scout / ISR" },
   { x: 17, y: 50, label: "Loitering" },
@@ -21,17 +26,63 @@ const NODES = [
 
 export default function StackDiagram() {
   const ref = useRef<HTMLDivElement>(null);
-  const [drawn, setDrawn] = useState(false);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    const root = ref.current;
+    if (!root) return;
+
+    const paths = Array.from(root.querySelectorAll<SVGPathElement>("path[data-line]"));
+    const nodes = Array.from(root.querySelectorAll<SVGGElement>("g[data-node]"));
+    const core = root.querySelector<SVGGElement>("g[data-core]");
+    const coreDot = root.querySelector<SVGCircleElement>("circle[data-core-dot]");
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Reduced motion: present the finished diagram, no drawing, no pulse.
+    if (reduce) {
+      for (const p of paths) p.style.strokeDashoffset = "0";
+      for (const n of nodes) n.style.opacity = "1";
+      if (core) core.style.opacity = "1";
+      return;
+    }
+
+    for (const p of paths) {
+      p.style.strokeDasharray = "1";
+      p.style.strokeDashoffset = "1";
+    }
+    for (const n of nodes) n.style.opacity = "0";
+    if (core) core.style.opacity = "0";
+
+    let tl: ReturnType<typeof createTimeline> | null = null;
+
     const io = new IntersectionObserver(
-      ([e]) => e.isIntersecting && setDrawn(true),
-      { threshold: 0.35 },
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        io.disconnect();
+
+        tl = createTimeline({ defaults: { ease: "outCubic" } })
+          .add(paths, { strokeDashoffset: 0, duration: 1100, delay: stagger(120) }, 0)
+          .add(nodes, { opacity: 1, duration: 700, delay: stagger(120, { start: 260 }) }, 0);
+
+        if (core) tl.add(core, { opacity: 1, duration: 800 }, 700);
+
+        // one pulse on the core once the structure has resolved — not a loop
+        if (coreDot) {
+          tl.add(
+            coreDot,
+            { r: [1.1, 2.2, 1.1], opacity: [1, 0.55, 1], duration: 1200, ease: "inOutSine" },
+            1500,
+          );
+        }
+      },
+      { threshold: 0.3 },
     );
-    io.observe(el);
-    return () => io.disconnect();
+
+    io.observe(root);
+    return () => {
+      io.disconnect();
+      tl?.pause();
+    };
   }, []);
 
   return (
@@ -55,7 +106,7 @@ export default function StackDiagram() {
             viewBox="0 0 100 100"
             className="h-auto w-full min-w-[560px]"
             role="img"
-            aria-label="Diagram: the GVL navigation core at centre, connected to six platforms."
+            aria-label="Diagram: the GVL navigation core at centre, connected to six platforms — Scout ISR, Loitering, Guided Munition, Interceptor, LegionNet and Microjet."
             preserveAspectRatio="xMidYMid meet"
           >
             {NODES.map((n, i) => {
@@ -64,22 +115,18 @@ export default function StackDiagram() {
               return (
                 <path
                   key={i}
+                  data-line
                   d={d}
                   fill="none"
                   stroke="var(--color-rule-lit)"
                   strokeWidth="0.25"
                   pathLength={1}
-                  style={{
-                    strokeDasharray: 1,
-                    strokeDashoffset: drawn ? 0 : 1,
-                    transition: `stroke-dashoffset 1100ms var(--ease-slow) ${i * 90}ms`,
-                  }}
                 />
               );
             })}
 
             {NODES.map((n, i) => (
-              <g key={`n-${i}`} style={{ opacity: drawn ? 1 : 0, transition: `opacity 900ms var(--ease-slow) ${i * 90 + 200}ms` }}>
+              <g key={`n-${i}`} data-node>
                 <circle cx={n.x} cy={n.y} r="0.9" fill="var(--color-ink-faint)" />
                 <text
                   x={n.x}
@@ -93,10 +140,9 @@ export default function StackDiagram() {
               </g>
             ))}
 
-            {/* the brain */}
-            <g style={{ opacity: drawn ? 1 : 0, transition: "opacity 900ms var(--ease-slow) 700ms" }}>
+            <g data-core>
               <rect x="42" y="44" width="16" height="12" fill="none" stroke="var(--color-autonomous)" strokeWidth="0.25" />
-              <circle cx="50" cy="48.5" r="1.1" fill="var(--color-autonomous)" />
+              <circle data-core-dot cx="50" cy="48.5" r="1.1" fill="var(--color-autonomous)" />
               <text
                 x="50"
                 y="54"
