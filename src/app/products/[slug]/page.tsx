@@ -68,7 +68,7 @@ export default async function ProductPage({
       <header className="rule-t rule-b">
         <div className="shell flex flex-col gap-4 py-12 md:flex-row md:items-baseline md:justify-between">
           <div>
-            <p className="t-label mb-4 text-ink-faint">{product.kind}</p>
+            <p className="t-label mb-4 text-ink-faint">{product.eyebrow ?? product.kind}</p>
             <h1 className="t-display-l text-ink">{product.name}</h1>
           </div>
           <p className="t-body-dim max-w-[46ch] md:text-right">{product.oneLiner}</p>
@@ -87,7 +87,19 @@ export default async function ProductPage({
         </section>
       )}
 
-      {/* 3 — capability: the terrain-mapping pair, Scout only (§8.3) */}
+      {/* 3 — field proof: the standout beat, when a product has one (§8.4) */}
+      {product.fieldProof && hasVideo(product.fieldProof.name) && (
+        <section className="rule-t" aria-label={product.fieldProof.caption}>
+          <FieldProof
+            name={product.fieldProof.name}
+            label={product.fieldProof.caption}
+            line={product.fieldProof.line}
+            accent
+          />
+        </section>
+      )}
+
+      {/* 4 — capability: the terrain-mapping pair, Scout only (§8.3) */}
       {isScout && (hasVideo("scout-terrain-1") || hasVideo("scout-terrain-2")) && (
         <section className="rule-t" aria-label="Capability — terrain mapping">
           <div className="shell py-20">
@@ -97,10 +109,8 @@ export default async function ProductPage({
                 <h2 className="t-display-m text-ink">Reading the ground it flies over.</h2>
               </div>
               <p className="t-body-dim md:col-span-6 md:col-start-7">
-                Both records show the platform building a picture of the terrain
-                beneath it. This is the same class of information GVL uses to fix
-                position when the satellite picture is unavailable — which is why
-                it sits on this page rather than in a separate demo.
+                {product.terrainIntro ??
+                  "Both records show the platform building a picture of the terrain beneath it. This is the same class of information GVL uses to fix position when the satellite picture is unavailable — which is why it sits on this page rather than in a separate demo."}
               </p>
             </div>
 
@@ -157,10 +167,17 @@ export default async function ProductPage({
       {/* 7 — status, 8 — CTA */}
       <section className="rule-t" aria-label="Status and next step">
         <div className="shell flex flex-col gap-8 py-16 md:flex-row md:items-center md:justify-between">
-          <p className="t-label text-ink-faint">
-            STATUS — <span className="text-ink">{product.status}</span>
-          </p>
-          <Link href="/contact" className="t-label link-quiet text-ink">
+          {product.statusLine ? (
+            <p className="t-label text-ink-faint">{product.statusLine}</p>
+          ) : (
+            <p className="t-label text-ink-faint">
+              STATUS — <span className="text-ink">{product.status}</span>
+            </p>
+          )}
+          <Link
+            href={`/contact?product=${product.slug}`}
+            className="t-label link-quiet text-ink"
+          >
             Request a briefing →
           </Link>
         </div>

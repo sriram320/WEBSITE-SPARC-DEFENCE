@@ -36,6 +36,14 @@ export type Product = {
   solves: string;
   brain: string;
   hotspots: Hotspot[];
+  eyebrow?: string;
+  fieldProof?: {
+    name: string;
+    caption: string;
+    line: string;
+  };
+  terrainIntro?: string;
+  statusLine?: string;
 };
 
 export const PRODUCTS: Product[] = [
@@ -110,6 +118,14 @@ export const PRODUCTS: Product[] = [
       { x: 52, y: 72, name: "Stabilised camera core", note: "Sensing only. Never an effector." },
       { x: 70, y: 40, name: "Flight controller", note: "Holds attitude and position." },
     ],
+    fieldProof: {
+      name: "scout-tracking",
+      caption: "FIELD PROOF ▸ OPTICAL TRACKING BEAT",
+      line: "Continuous lock on geo-visual landmarks without GPS reference.",
+    },
+    terrainIntro:
+      "Both records show the platform building a picture of the terrain beneath it. This is the same class of information GVL uses to fix position when the satellite picture is unavailable — which is why it sits on this page rather than in a separate demo.",
+    statusLine: "STATUS — DEMONSTRATOR",
   },
   {
     slug: "loitering",

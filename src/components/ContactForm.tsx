@@ -14,7 +14,13 @@ import { useState } from "react";
  */
 type Errors = Partial<Record<"name" | "organisation" | "email" | "message", string>>;
 
-export default function ContactForm() {
+type Props = {
+  /** set when arriving via a product page's "Request a briefing" CTA */
+  productSlug?: string;
+  productName?: string;
+};
+
+export default function ContactForm({ productSlug, productName }: Props) {
   const [errors, setErrors] = useState<Errors>({});
   const [sent, setSent] = useState(false);
 
@@ -46,7 +52,8 @@ export default function ContactForm() {
         <p className="t-body-dim max-w-[46ch]">
           This site is a frontend demonstration, so nothing has actually been
           transmitted. On the live site this would reach the team directly and we
-          would come back to you within a few working days.
+          would come back to you within a few working days
+          {productName ? ` about ${productName}` : ""}.
         </p>
         <button
           type="button"
@@ -61,6 +68,12 @@ export default function ContactForm() {
 
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-9 border-t border-rule pt-8">
+      {productName && (
+        <p className="t-label text-ink-faint">
+          Re: <span className="text-ink">{productName}</span>
+        </p>
+      )}
+      {productSlug && <input type="hidden" name="product" value={productSlug} />}
       <Field name="name" label="Name" error={errors.name} autoComplete="name" />
       <Field
         name="organisation"

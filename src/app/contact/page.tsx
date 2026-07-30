@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ContactForm from "@/components/ContactForm";
+import { productBySlug } from "@/data/products";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -8,7 +9,14 @@ export const metadata: Metadata = {
 };
 
 /** Contact — BUILD_BRIEF §10. The briefing destination. */
-export default function ContactPage() {
+export default async function ContactPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ product?: string }>;
+}) {
+  const { product: productSlug } = await searchParams;
+  const product = productSlug ? productBySlug(productSlug) : undefined;
+
   return (
     <>
       <section className="rule-b pt-32">
@@ -27,7 +35,7 @@ export default function ContactPage() {
 
       <section className="shell grid gap-16 py-20 md:grid-cols-12">
         <div className="md:col-span-6">
-          <ContactForm />
+          <ContactForm productSlug={product?.slug} productName={product?.name} />
         </div>
 
         <div className="flex flex-col gap-10 md:col-span-4 md:col-start-9">
