@@ -28,7 +28,13 @@ export const dynamic = "force-dynamic";
  * and there is no local password table anywhere in this codebase.
  */
 
-const client = new CognitoIdentityProviderClient({ region: cognitoConfig.region });
+let client: CognitoIdentityProviderClient | null = null;
+function getClient() {
+  if (!client) {
+    client = new CognitoIdentityProviderClient({ region: cognitoConfig.region });
+  }
+  return client;
+}
 
 /**
  * Deliberately identical for "no such user" and "wrong password". Telling the
@@ -90,7 +96,7 @@ export async function POST(req: Request) {
 
   let result: InitiateAuthCommandOutput;
   try {
-    result = await client.send(
+    result = await getClient().send(
       new InitiateAuthCommand({
         AuthFlow: "USER_PASSWORD_AUTH",
         ClientId: cognitoConfig.clientId,

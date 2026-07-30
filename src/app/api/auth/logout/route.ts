@@ -16,7 +16,13 @@ import { cookies } from "next/headers";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const client = new CognitoIdentityProviderClient({ region: cognitoConfig.region });
+let client: CognitoIdentityProviderClient | null = null;
+function getClient() {
+  if (!client) {
+    client = new CognitoIdentityProviderClient({ region: cognitoConfig.region });
+  }
+  return client;
+}
 
 /**
  * Sign-out.
@@ -35,7 +41,7 @@ export async function POST() {
 
   if (accessToken) {
     try {
-      await client.send(new GlobalSignOutCommand({ AccessToken: accessToken }));
+      await getClient().send(new GlobalSignOutCommand({ AccessToken: accessToken }));
     } catch {
       // Already expired or revoked. Nothing to do; still clear the cookies.
     }
