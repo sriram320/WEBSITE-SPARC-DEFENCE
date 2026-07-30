@@ -19,7 +19,8 @@ frontend:
         # pushing is enough — no code change (BUILD_BRIEF §11).
         - npm run build
   artifacts:
-    baseDirectory: .next
+    # Server-rendered build (platform WEB_COMPUTE). Amplify reads .next and
+    # provisions the Next.js runtime itself, so no baseDirectory is set.
     files:
       - '**/*'
   cache:
